@@ -1,6 +1,6 @@
 # company-icons
 
-Internal React SVG icon components.
+Internal React SVG icon components for product UIs.
 
 ```js
 import { Coins, Phone, Like } from "company-icons";
@@ -8,7 +8,24 @@ import { Coins, Phone, Like } from "company-icons";
 <Coins />
 ```
 
-Icons inherit color from CSS `color` (`currentColor`).
+Icons inherit color from CSS `color` (`currentColor`) and size from `font-size` or `width` / `height` props.
+
+## Documentation gallery
+
+Browse every **public** icon export, search by component name, preview sizes, and copy import statements:
+
+```bash
+npm install
+npm run docs
+```
+
+Opens locally at [http://localhost:5173](http://localhost:5173).
+
+- `npm run docs` — build the library, then start the gallery
+- `npm run docs:dev` — start the gallery only (requires an existing `dist/` build)
+- `npm run docs:build` — build a static gallery into `docs-dist/`
+
+The gallery imports `dist/index.esm.js` and lists named function exports. It does **not** scan `assets/` directly, so unpublished or unexported SVGs never appear.
 
 ## Develop
 
@@ -17,91 +34,76 @@ npm install
 npm run build
 ```
 
-Add SVGs under `assets/`, then rebuild. Filenames become PascalCase named exports (`info-circle.svg` → `InfoCircle`).
+### Add a new icon
 
-## Publish
+1. Add an SVG under `assets/` (for example `assets/gold.svg`).
+2. Prefer `#1D1D1D` for strokes/fills so SVGR rewrites them to `currentColor`.
+3. Run `npm run build` — SVGR regenerates `src/` (including `src/index.js` named exports) and Rollup updates `dist/`.
+4. Run `npm run docs` — the new export appears in the gallery automatically.
 
-`private` is off so the package can be published. `prepublishOnly` builds `dist/` before publish.
+## Installation (GitLab Package Registry)
 
-### Option A — Verdaccio
-
-1. Start Verdaccio (once):
-
-   ```bash
-   npx verdaccio
-   ```
-
-2. Create a user and log in:
-
-   ```bash
-   npm adduser --registry http://localhost:4873
-   ```
-
-3. Publish:
-
-   ```bash
-   npm publish --registry http://localhost:4873
-   ```
-
-   Or copy `.npmrc.example` → `.npmrc`, set the Verdaccio registry, then run `npm publish`.
-
-### Option B — npmjs.com (private)
-
-Requires an npm org and a plan that allows private packages. Prefer a scoped name, e.g. `@your-org/company-icons`.
-
-1. Log in: `npm login`
-2. Set `"name": "@your-org/company-icons"` in `package.json` if you use a scope
-3. Publish:
-
-   ```bash
-   npm publish --access restricted
-   ```
-
-`publishConfig.access` is already `"restricted"`.
-
-### Version bumps
-
-Before each publish:
-
-```bash
-npm version patch   # or minor / major
-npm publish --registry <your-registry>
-```
-
-## Install in other projects
-
-### Verdaccio
-
-In the consumer project `.npmrc`:
+Authenticate with a GitLab token that can read the package registry, then install:
 
 ```ini
-registry=http://localhost:4873/
-@babel:registry=https://registry.npmjs.org/
+# .npmrc
+@frontend-team:registry=https://gitlab.com/api/v4/packages/npm/
+//gitlab.com/api/v4/packages/npm/:_authToken=${GITLAB_TOKEN}
 ```
 
-Then:
+Project-level registry alternative:
+
+```ini
+@frontend-team:registry=https://gitlab.com/api/v4/projects/<PROJECT_ID>/packages/npm/
+//gitlab.com/api/v4/projects/<PROJECT_ID>/packages/npm/:_authToken=${GITLAB_TOKEN}
+```
 
 ```bash
 npm install company-icons
 ```
 
-Pointing only this package at Verdaccio (recommended if most deps stay on npmjs):
+If your group requires a scoped name, set `"name": "@frontend-team/company-icon"` in `package.json` before publish; import paths and the gallery copy action follow that name.
 
-```ini
-company-icons:registry=http://localhost:4873/
+Peer dependency: `react` (>= 17).
+
+## Usage
+
+```js
+import { Coins, Phone } from "company-icons";
+
+export function Example() {
+  return (
+    <>
+      <Coins width={24} height={24} title="Coins" />
+      <Phone style={{ fontSize: 32, color: "#0f766e" }} />
+    </>
+  );
+}
 ```
 
-### npmjs private / scoped
+- Default SVG size is `1em`, so `font-size` scales the icon.
+- Strokes use `currentColor`.
+- Pass `title` / `titleId` when the icon conveys meaning on its own.
 
-```ini
-@your-org:registry=https://registry.npmjs.org/
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
-```
+## Publish
+
+`prepublishOnly` builds `dist/` before publish.
+
+### GitLab
 
 ```bash
-npm install @your-org/company-icons
+npm publish --registry=https://gitlab.com/api/v4/projects/<PROJECT_ID>/packages/npm/
 ```
 
-## Peer dependency
+Or configure `publishConfig.registry` / `.npmrc` for the project registry, then run `npm publish`.
 
-Consumers must have `react` (>= 17) installed.
+### Verdaccio / npmjs
+
+See `.npmrc.example` for local Verdaccio or npmjs private-package options.
+
+### Version bumps
+
+```bash
+npm version patch   # or minor / major
+npm publish
+```
