@@ -1,0 +1,12 @@
+# Copy to .npmrc (gitignored) and adjust for your registry.
+
+# --- Verdaccio (local or self-hosted) ---
+# registry=http://localhost:4873/
+# //localhost:4873/:_authToken=YOUR_TOKEN
+
+# --- npmjs.com private package ---
+# @your-org:registry=https://registry.npmjs.org/
+# //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+
+# Always keep public packages on the public registry when using a custom default:
+# @babel:registry=https://registry.npmjs.org/
